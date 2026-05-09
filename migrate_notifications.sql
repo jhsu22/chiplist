@@ -1,23 +1,3 @@
--- Run once against existing databases:
---   npm run db:migrate          (local)
---   npm run db:migrate:remote   (production)
---
--- Each ALTER TABLE / CREATE TABLE is idempotent-ish via IF NOT EXISTS / IGNORE.
-
-ALTER TABLE sessions ADD COLUMN status TEXT NOT NULL DEFAULT 'approved';
-
--- Assign strawby as leader of SoCal Hanime
-UPDATE groups
-SET owner_id = (
-    SELECT u.id
-    FROM users u
-    JOIN players p ON p.user_id = u.id
-    WHERE LOWER(p.name) = 'strawby'
-    LIMIT 1
-)
-WHERE LOWER(name) = 'socal hanime'
-  AND owner_id IS NULL;
-
 CREATE TABLE IF NOT EXISTS settlements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,

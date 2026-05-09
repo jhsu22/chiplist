@@ -1,5 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import { getPlayers, createSession, upsertEntry, getUserGroups, getGroupMembers, getGroupById } from '$lib/db';
+import { notifySessionApproved, notifyGroupLeaderPending } from '$lib/notifications';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
@@ -54,11 +55,13 @@ export const actions: Actions = {
 
 		// Non-leaders submitting to a group get pending status
 		let status = 'approved';
+		let groupOwnerId: number | null = null;
 		if (group_id) {
 			const group = await getGroupById(db, group_id);
 			if (group && group.owner_id && group.owner_id !== locals.user.id) {
 				status = 'pending';
 			}
+			groupOwnerId = group?.owner_id ?? null;
 		}
 
 		const id = await createSession(db, {
@@ -81,8 +84,14 @@ export const actions: Actions = {
 		}
 
 		if (status === 'pending' && group_id) {
+			if (groupOwnerId) {
+				await notifyGroupLeaderPending(db, id, name, groupOwnerId);
+			}
 			redirect(302, `/groups/${group_id}?submitted=pending`);
 		}
+
+		// Session is immediately approved — notify participants and create settlements
+		await notifySessionApproved(db, id, name);
 		redirect(302, `/sessions/${id}`);
 	}
 };

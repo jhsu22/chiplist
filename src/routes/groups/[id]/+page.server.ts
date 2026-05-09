@@ -2,8 +2,9 @@ import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 import {
 	getGroupById, getGroupMembers, getGroupSessions, getPendingGroupSessions,
-	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession
+	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession, getSession
 } from '$lib/db';
+import { notifySessionApproved } from '$lib/notifications';
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
 	if (!locals.user) redirect(302, '/login');
@@ -68,7 +69,13 @@ export const actions: Actions = {
 		const sessionId = Number(data.get('session_id'));
 		if (!sessionId) return fail(400, { error: 'Missing session id' });
 
+		const session = await getSession(db, sessionId);
 		await approveSession(db, sessionId);
+
+		if (session) {
+			await notifySessionApproved(db, sessionId, session.name);
+		}
+
 		return { approve_success: true };
 	},
 

@@ -65,3 +65,34 @@ export interface Group {
 	owner_id: number | null;
 	created_at: string;
 }
+
+export interface SettlementRecord {
+	id: number;
+	session_id: number;
+	from_player_id: number;
+	to_player_id: number;
+	amount: number; // cents
+	status: 'pending' | 'sent' | 'resolved';
+	created_at: string;
+	sent_at: string | null;
+	resolved_at: string | null;
+}
+
+export interface NotificationRecord {
+	id: number;
+	user_id: number;
+	type: 'session_pending' | 'session_approved' | 'you_owe' | 'payment_sent' | 'payment_confirmed';
+	title: string;
+	body: string;
+	related_id: number | null;
+	read: number; // 0 | 1
+	created_at: string;
+	// Enriched fields (joined):
+	settlement_status?: string | null;
+	settlement_amount?: number | null;
+	from_player_id?: number | null;
+	to_player_id?: number | null;
+	settlement_from_name?: string | null;
+	settlement_to_name?: string | null;
+	session_group_id?: number | null;
+}

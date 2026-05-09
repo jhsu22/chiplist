@@ -1,5 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import type { Player, Session, SessionEntry, SessionEntryWithPlayer, User, Group } from './types';
+import type { Player, Session, SessionEntry, SessionEntryWithPlayer, User, Group, NotificationRecord, SettlementRecord } from './types';
 
 // ── Players ──────────────────────────────────────────────────────────────────
 
@@ -317,4 +317,108 @@ export async function updateUserDisplayName(
 		.prepare('UPDATE users SET display_name = ? WHERE id = ?')
 		.bind(display_name, user_id)
 		.run();
+}
+
+// ── Settlements ───────────────────────────────────────────────────────────────
+
+export async function createSettlement(
+	db: D1Database,
+	session_id: number,
+	from_player_id: number,
+	to_player_id: number,
+	amount: number
+): Promise<number> {
+	const result = await db
+		.prepare(
+			'INSERT INTO settlements (session_id, from_player_id, to_player_id, amount) VALUES (?, ?, ?, ?) RETURNING id'
+		)
+		.bind(session_id, from_player_id, to_player_id, amount)
+		.first<{ id: number }>();
+	return result!.id;
+}
+
+export async function getSettlement(db: D1Database, id: number): Promise<SettlementRecord | null> {
+	return db
+		.prepare('SELECT * FROM settlements WHERE id = ?')
+		.bind(id)
+		.first<SettlementRecord>();
+}
+
+export async function updateSettlementStatus(
+	db: D1Database,
+	id: number,
+	status: 'sent' | 'resolved'
+): Promise<void> {
+	const field = status === 'sent' ? 'sent_at' : 'resolved_at';
+	await db
+		.prepare(`UPDATE settlements SET status = ?, ${field} = datetime('now') WHERE id = ?`)
+		.bind(status, id)
+		.run();
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export async function createNotification(
+	db: D1Database,
+	user_id: number,
+	type: string,
+	title: string,
+	body: string,
+	related_id?: number | null
+): Promise<void> {
+	await db
+		.prepare(
+			'INSERT INTO notifications (user_id, type, title, body, related_id) VALUES (?, ?, ?, ?, ?)'
+		)
+		.bind(user_id, type, title, body, related_id ?? null)
+		.run();
+}
+
+export async function getEnrichedNotifications(
+	db: D1Database,
+	user_id: number
+): Promise<NotificationRecord[]> {
+	const result = await db
+		.prepare(
+			`SELECT
+         n.id, n.type, n.title, n.body, n.related_id, n.read, n.created_at,
+         s.status  AS settlement_status,
+         s.amount  AS settlement_amount,
+         s.from_player_id,
+         s.to_player_id,
+         pf.name   AS settlement_from_name,
+         pt.name   AS settlement_to_name,
+         sess.group_id AS session_group_id
+       FROM notifications n
+       LEFT JOIN settlements s
+         ON s.id = n.related_id
+         AND n.type IN ('you_owe', 'payment_sent', 'payment_confirmed')
+       LEFT JOIN players pf ON pf.id = s.from_player_id
+       LEFT JOIN players pt ON pt.id = s.to_player_id
+       LEFT JOIN sessions sess
+         ON sess.id = n.related_id
+         AND n.type IN ('session_pending', 'session_approved')
+       WHERE n.user_id = ?
+       ORDER BY n.read ASC, n.created_at DESC
+       LIMIT 100`
+		)
+		.bind(user_id)
+		.all<NotificationRecord>();
+	return result.results;
+}
+
+export async function getUnreadNotificationCount(db: D1Database, user_id: number): Promise<number> {
+	const row = await db
+		.prepare('SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND read = 0')
+		.bind(user_id)
+		.first<{ count: number }>();
+	return row?.count ?? 0;
+}
+
+export async function markNotificationRead(db: D1Database, id: number): Promise<void> {
+	await db.prepare('UPDATE notifications SET read = 1 WHERE id = ?').bind(id).run();
+}
+
+export async function markAllNotificationsRead(db: D1Database, user_id: number): Promise<void> {
+	await db.prepare('UPDATE notifications SET read = 1 WHERE user_id = ?').bind(user_id).run();
 }

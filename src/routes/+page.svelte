@@ -43,12 +43,15 @@
 		</a>
 	{/if}
 	<div class="logo"><span class="dot"></span>chiplist</div>
-	<div class="icon-btn">
+	<a href="/notifications" class="icon-btn" style="text-decoration:none; position:relative">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/>
 			<path d="M10 20a2 2 0 004 0"/>
 		</svg>
-	</div>
+		{#if ($page.data.unreadCount ?? 0) > 0}
+			<span style="position:absolute;top:-4px;right:-4px;background:#e05555;color:white;font-size:9px;font-weight:800;line-height:1;padding:2px 4px;border-radius:999px;min-width:14px;text-align:center">{$page.data.unreadCount > 9 ? '9+' : $page.data.unreadCount}</span>
+		{/if}
+	</a>
 </div>
 
 <!-- ── LOGGED IN ── -->

@@ -8,8 +8,10 @@
 		path.startsWith('/sessions/new') ? 'new' :
 		path.startsWith('/sessions') ? 'sessions' :
 		path.startsWith('/groups') ? 'groups' :
+		path.startsWith('/notifications') ? 'notifications' :
 		path.startsWith('/profile') || path.startsWith('/players') ? 'me' : 'home';
 	$: user = $page.data.user;
+	$: unreadCount = $page.data.unreadCount ?? 0;
 </script>
 
 <div class="shell">
@@ -46,6 +48,20 @@
 					<path d="M3 19c.8-3.5 3.2-5 6-5s5.2 1.5 6 5M15 19c.5-2 1.7-3 3-3s2.4 1 3 3"/>
 				</svg>
 				<span>Groups</span>
+			</a>
+
+			<!-- Notifications tab -->
+			<a href="/notifications" class="tab" class:active={activeTab === 'notifications'}>
+				<div class="bell-wrap">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={activeTab === 'notifications' ? 2.4 : 2} stroke-linecap="round" stroke-linejoin="round">
+						<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/>
+						<path d="M10 20a2 2 0 004 0"/>
+					</svg>
+					{#if unreadCount > 0}
+						<span class="badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+					{/if}
+				</div>
+				<span>Alerts</span>
 			</a>
 
 			<!-- Me tab -->
@@ -141,5 +157,27 @@
 	box-shadow: 0 3px 0 var(--ink);
 	margin-top: -22px;
 	flex-direction: row;
+}
+
+.bell-wrap {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.badge {
+	position: absolute;
+	top: -5px;
+	right: -7px;
+	background: #e05555;
+	color: white;
+	font-size: 9px;
+	font-weight: 800;
+	line-height: 1;
+	padding: 2px 4px;
+	border-radius: 999px;
+	min-width: 16px;
+	text-align: center;
 }
 </style>
