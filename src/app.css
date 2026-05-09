@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:          #FFF6EC;
+  --bg2:         #FBEEDA;
+  --card:        #FFFFFF;
+  --ink:         #1A1410;
+  --ink2:        #5C4F44;
+  --ink3:        #9B8A7A;
+  --rule:        #F2E5D3;
+  --accent:      #FF6E4F;
+  --accent-soft: #FFE0D7;
+  --accent-ink:  #FFFFFF;
+  --pos:         #1F8A4C;
+  --pos-bg:      #D6F0DD;
+  --neg:         #E0463A;
+  --neg-bg:      #FFD9D2;
+  --cobalt:      #2944D8;
+  --cobalt-soft: #DAE0FB;
+  --coral:       #FF6E4F;
+  --coral-soft:  #FFE0D7;
+  --butter:      #FFC74A;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ECEAE3;
+  font-family: "Helvetica Neue", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Pop utility classes */
+.pop-display {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.pop-mono {
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.profit { color: var(--pos); font-weight: 800; }
+.loss   { color: var(--neg); font-weight: 800; }
+.even   { color: var(--ink3); font-weight: 800; }
+
+/* Scrollable area hides scrollbar but stays scrollable */
+.pop-scroll::-webkit-scrollbar { display: none; }
+.pop-scroll { -ms-overflow-style: none; scrollbar-width: none; }
