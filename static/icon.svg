@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <circle cx="256" cy="256" r="256" fill="#FF6E4F"/>
+  <!-- Outer chip groove ring -->
+  <circle cx="256" cy="256" r="172" fill="none" stroke="#FFF6EC" stroke-width="26" opacity="0.55"/>
+  <!-- Inner chip groove ring -->
+  <circle cx="256" cy="256" r="106" fill="none" stroke="#FFF6EC" stroke-width="20" opacity="0.75"/>
+  <!-- Center pip -->
+  <circle cx="256" cy="256" r="48" fill="#FFF6EC" opacity="0.9"/>
+</svg>

@@ -1,0 +1,28 @@
+{
+  "name": "chiplist",
+  "short_name": "chiplist",
+  "description": "Track your poker bankroll with your crew",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF6EC",
+  "theme_color": "#FF6E4F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ]
+}

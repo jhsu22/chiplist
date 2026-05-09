@@ -15,7 +15,7 @@
 </svelte:head>
 
 <!-- Header -->
-<div style="padding: 56px 20px 0">
+<div style="padding: 20px 20px 0">
 	<div class="pop-display" style="font-size:32px; margin-top:8px; line-height:1; color:var(--ink)">Players</div>
 	<div style="font-size:13px; color:var(--ink2); margin-top:6px">{data.players.length} regular{data.players.length !== 1 ? 's' : ''}</div>
 </div>

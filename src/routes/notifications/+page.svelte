@@ -37,7 +37,7 @@
 </svelte:head>
 
 <!-- Header -->
-<div style="padding:56px 20px 0; display:flex; justify-content:space-between; align-items:center">
+<div style="padding:20px 20px 0; display:flex; justify-content:space-between; align-items:center">
 	<a href="/" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:999px; background:var(--card); border:1.5px solid var(--ink); color:var(--ink); text-decoration:none">
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
 	</a>

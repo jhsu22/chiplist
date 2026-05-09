@@ -275,7 +275,7 @@
 </div>
 
 <style>
-.header { padding: 56px 20px 0; display:flex; justify-content:space-between; align-items:center; }
+.header { padding: 20px 20px 0; display:flex; justify-content:space-between; align-items:center; }
 .avatar-sm { width:38px; height:38px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; border:2px solid var(--ink); }
 .login-btn { color:var(--ink2); background:var(--card); }
 .logo { font-size:20px; font-weight:800; letter-spacing:-0.4px; display:flex; align-items:center; gap:6px; color:var(--ink); }

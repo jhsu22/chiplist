@@ -8,10 +8,7 @@
 		path.startsWith('/sessions/new') ? 'new' :
 		path.startsWith('/sessions') ? 'sessions' :
 		path.startsWith('/groups') ? 'groups' :
-		path.startsWith('/notifications') ? 'notifications' :
 		path.startsWith('/profile') || path.startsWith('/players') ? 'me' : 'home';
-	$: user = $page.data.user;
-	$: unreadCount = $page.data.unreadCount ?? 0;
 </script>
 
 <div class="shell">
@@ -50,21 +47,6 @@
 				<span>Groups</span>
 			</a>
 
-			<!-- Notifications tab -->
-			<a href="/notifications" class="tab" class:active={activeTab === 'notifications'}>
-				<div class="bell-wrap">
-					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={activeTab === 'notifications' ? 2.4 : 2} stroke-linecap="round" stroke-linejoin="round">
-						<path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/>
-						<path d="M10 20a2 2 0 004 0"/>
-					</svg>
-					{#if unreadCount > 0}
-						<span class="badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
-					{/if}
-				</div>
-				<span>Alerts</span>
-			</a>
-
-			<!-- Me tab -->
 			<a href="/profile" class="tab" class:active={activeTab === 'me'}>
 				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={activeTab === 'me' ? 2.4 : 2} stroke-linecap="round" stroke-linejoin="round">
 					<circle cx="12" cy="8" r="4"/>
@@ -78,40 +60,38 @@
 
 <style>
 .shell {
-	min-height: 100vh;
-	min-height: 100dvh;
+	height: 100dvh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0;
 	background: #ECEAE3;
+	overflow: hidden;
 }
 
 .screen {
 	position: relative;
 	width: 100%;
 	max-width: 430px;
-	min-height: 100vh;
-	min-height: 100dvh;
+	height: 100%;
 	background: var(--bg);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	/* Push content below the iOS status bar */
+	padding-top: env(safe-area-inset-top);
 }
 
 .screen-inner {
 	flex: 1;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
+	min-height: 0;
 	padding-bottom: 100px;
 }
 
 .tabbar {
-	position: sticky;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 8px 8px 28px;
+	flex-shrink: 0;
+	padding: 8px 8px max(28px, env(safe-area-inset-bottom));
 	background: rgba(255, 246, 236, 0.92);
 	backdrop-filter: blur(20px);
 	-webkit-backdrop-filter: blur(20px);
@@ -157,27 +137,5 @@
 	box-shadow: 0 3px 0 var(--ink);
 	margin-top: -22px;
 	flex-direction: row;
-}
-
-.bell-wrap {
-	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.badge {
-	position: absolute;
-	top: -5px;
-	right: -7px;
-	background: #e05555;
-	color: white;
-	font-size: 9px;
-	font-weight: 800;
-	line-height: 1;
-	padding: 2px 4px;
-	border-radius: 999px;
-	min-width: 16px;
-	text-align: center;
 }
 </style>
