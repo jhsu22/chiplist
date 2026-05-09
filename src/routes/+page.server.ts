@@ -1,4 +1,5 @@
 import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
 import {
 	getPlayers, getSessions, getSessionEntries,
 	getPlayerByUserId, getPlayerEntries,
@@ -6,6 +7,8 @@ import {
 } from '$lib/db';
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
+
 	const db = platform?.env?.DB;
 	if (!db) return {
 		leaderboard: [], recent_sessions: [],

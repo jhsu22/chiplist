@@ -54,13 +54,13 @@ export async function getSession(db: D1Database, id: number): Promise<Session | 
 
 export async function createSession(
 	db: D1Database,
-	data: Pick<Session, 'name' | 'date' | 'location' | 'blinds' | 'hours' | 'notes'> & { group_id?: number | null }
+	data: Pick<Session, 'name' | 'date' | 'location' | 'blinds' | 'hours' | 'notes'> & { group_id?: number | null; status?: string }
 ): Promise<number> {
 	const result = await db
 		.prepare(
-			'INSERT INTO sessions (name, date, location, blinds, hours, notes, group_id) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id'
+			'INSERT INTO sessions (name, date, location, blinds, hours, notes, group_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id'
 		)
-		.bind(data.name, data.date, data.location, data.blinds ?? '', data.hours ?? 0, data.notes, data.group_id ?? null)
+		.bind(data.name, data.date, data.location, data.blinds ?? '', data.hours ?? 0, data.notes, data.group_id ?? null, data.status ?? 'approved')
 		.first<{ id: number }>();
 	return result!.id;
 }
@@ -265,7 +265,7 @@ export async function getGroupMembers(
        FROM group_members gm
        JOIN players p ON p.id = gm.player_id
        LEFT JOIN session_entries se ON se.player_id = p.id
-       LEFT JOIN sessions s ON s.id = se.session_id AND s.group_id = ?
+       LEFT JOIN sessions s ON s.id = se.session_id AND s.group_id = ? AND (s.status = 'approved' OR s.status IS NULL)
        WHERE gm.group_id = ?
        GROUP BY p.id, p.name
        ORDER BY net_profit DESC`
@@ -290,10 +290,22 @@ export async function addGroupMember(
 
 export async function getGroupSessions(db: D1Database, group_id: number): Promise<Session[]> {
 	const result = await db
-		.prepare('SELECT * FROM sessions WHERE group_id = ? ORDER BY date DESC')
+		.prepare("SELECT * FROM sessions WHERE group_id = ? AND (status = 'approved' OR status IS NULL) ORDER BY date DESC")
 		.bind(group_id)
 		.all<Session>();
 	return result.results;
+}
+
+export async function getPendingGroupSessions(db: D1Database, group_id: number): Promise<Session[]> {
+	const result = await db
+		.prepare("SELECT * FROM sessions WHERE group_id = ? AND status = 'pending' ORDER BY date DESC")
+		.bind(group_id)
+		.all<Session>();
+	return result.results;
+}
+
+export async function approveSession(db: D1Database, id: number): Promise<void> {
+	await db.prepare("UPDATE sessions SET status = 'approved' WHERE id = ?").bind(id).run();
 }
 
 export async function updateUserDisplayName(

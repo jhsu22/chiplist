@@ -50,6 +50,6 @@ export const actions: Actions = {
 			secure,
 		});
 
-		redirect(302, '/groups/new');
+		redirect(302, '/groups');
 	}
 };

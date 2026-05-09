@@ -1,8 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { getPlayer, getPlayerEntries } from '$lib/db';
 
-export const load: PageServerLoad = async ({ params, platform }) => {
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const db = platform!.env.DB;
 	const id = Number(params.id);
 

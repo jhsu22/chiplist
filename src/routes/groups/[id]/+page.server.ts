@@ -1,8 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
-import { error, fail } from '@sveltejs/kit';
-import { getGroupById, getGroupMembers, getGroupSessions, createPlayer, addGroupMember, getPlayers } from '$lib/db';
+import { error, fail, redirect } from '@sveltejs/kit';
+import {
+	getGroupById, getGroupMembers, getGroupSessions, getPendingGroupSessions,
+	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession
+} from '$lib/db';
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
+
 	const db = platform?.env?.DB;
 	if (!db) error(503, 'Database unavailable');
 
@@ -15,11 +20,15 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 
 	if (!group) error(404, 'Group not found');
 
-	return { group, members, sessions, user: locals.user };
+	const isLeader = locals.user.id === group.owner_id;
+	const pendingSessions = isLeader ? await getPendingGroupSessions(db, id) : [];
+
+	return { group, members, sessions, pendingSessions, isLeader, user: locals.user };
 };
 
 export const actions: Actions = {
-	add_member: async ({ params, request, platform }) => {
+	add_member: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { add_error: 'Not logged in' });
 		const db = platform?.env?.DB;
 		if (!db) return fail(503, { add_error: 'Database unavailable' });
 
@@ -28,7 +37,6 @@ export const actions: Actions = {
 		const playerName = String(data.get('player_name') ?? '').trim();
 		if (!playerName) return fail(400, { add_error: 'Enter a player name' });
 
-		// Look for existing player with that name (case-insensitive)
 		const allPlayers = await getPlayers(db);
 		const existing = allPlayers.find(p => p.name.toLowerCase() === playerName.toLowerCase());
 
@@ -39,13 +47,44 @@ export const actions: Actions = {
 			playerId = await createPlayer(db, playerName);
 		}
 
-		// Upsert — addGroupMember has UNIQUE constraint, so wrap in try/catch
 		try {
 			await addGroupMember(db, groupId, playerId);
 		} catch {
-			// Already a member — not an error
+			// Already a member
 		}
 
 		return { add_success: true };
-	}
+	},
+
+	approve_session: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform?.env?.DB;
+		if (!db) return fail(503, { error: 'Database unavailable' });
+
+		const group = await getGroupById(db, Number(params.id));
+		if (!group || group.owner_id !== locals.user.id) return fail(403, { error: 'Not authorized' });
+
+		const data = await request.formData();
+		const sessionId = Number(data.get('session_id'));
+		if (!sessionId) return fail(400, { error: 'Missing session id' });
+
+		await approveSession(db, sessionId);
+		return { approve_success: true };
+	},
+
+	reject_session: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform?.env?.DB;
+		if (!db) return fail(503, { error: 'Database unavailable' });
+
+		const group = await getGroupById(db, Number(params.id));
+		if (!group || group.owner_id !== locals.user.id) return fail(403, { error: 'Not authorized' });
+
+		const data = await request.formData();
+		const sessionId = Number(data.get('session_id'));
+		if (!sessionId) return fail(400, { error: 'Missing session id' });
+
+		await deleteSession(db, sessionId);
+		return { reject_success: true };
+	},
 };

@@ -17,6 +17,7 @@ export interface Session {
 	notes: string | null;
 	created_at: string;
 	group_id?: number | null;
+	status?: string;
 }
 
 export interface SessionEntry {

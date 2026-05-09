@@ -109,19 +109,56 @@
 						<a href="/sessions/new" style="color:var(--accent); font-weight:800; text-decoration:none; display:block; margin-top:8px">Log a session →</a>
 					</div>
 				{:else}
-					{#each activeGroup.members as m, i}
-						<a href="/players/{m.player_id}" class="row-card">
-							<div class="row-rank" style="color:{i < 3 ? 'var(--accent)' : 'var(--ink3)'}">{i + 1}</div>
-							<div class="row-avatar" style="background:{playerColor(m.player_id)}">{initials(m.player_name)}</div>
-							<div class="row-info">
-								<div class="row-name">{m.player_name}</div>
-								<div class="row-sub">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
+					{@const grpTop3 = activeGroup.members.slice(0, 3)}
+					{@const grpRest = activeGroup.members.slice(3)}
+					{#if grpTop3.length >= 2}
+						<div class="podium">
+							{#each [grpTop3[1], grpTop3[0], grpTop3[2]].filter(Boolean) as m, i}
+								{@const rank = i === 1 ? 1 : i === 0 ? 2 : 3}
+								{@const heights = { 1: 130, 2: 100, 3: 82 }}
+								{@const bgs = { 1: 'var(--butter)', 2: 'var(--coral-soft)', 3: 'var(--cobalt-soft)' }}
+								<a href="/players/{m.player_id}" class="podium-col">
+									<div class="podium-avatar" style="background:{playerColor(m.player_id)}">{initials(m.player_name)}</div>
+									<div class="podium-name">{m.player_name.split(' ')[0]}</div>
+									<div class="podium-bar" style="height:{heights[rank]}px; background:{bgs[rank]}">
+										<div class="podium-bar-val">{formatProfit(m.net_profit)}</div>
+										<div class="podium-bar-rank">{rank}</div>
+									</div>
+								</a>
+							{/each}
+						</div>
+						{#if grpRest.length > 0}
+							<div style="margin-top:8px">
+								{#each grpRest as m, i}
+									<a href="/players/{m.player_id}" class="row-card">
+										<div class="row-rank">{i + 4}</div>
+										<div class="row-avatar" style="background:{playerColor(m.player_id)}">{initials(m.player_name)}</div>
+										<div class="row-info">
+											<div class="row-name">{m.player_name}</div>
+											<div class="row-sub">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
+										</div>
+										<div class="row-profit pop-mono" style="color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}">
+											{formatProfit(m.net_profit)}
+										</div>
+									</a>
+								{/each}
 							</div>
-							<div class="row-profit pop-mono" style="color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}">
-								{formatProfit(m.net_profit)}
-							</div>
-						</a>
-					{/each}
+						{/if}
+					{:else}
+						{#each activeGroup.members as m, i}
+							<a href="/players/{m.player_id}" class="row-card">
+								<div class="row-rank" style="color:{i < 3 ? 'var(--accent)' : 'var(--ink3)'}">{i + 1}</div>
+								<div class="row-avatar" style="background:{playerColor(m.player_id)}">{initials(m.player_name)}</div>
+								<div class="row-info">
+									<div class="row-name">{m.player_name}</div>
+									<div class="row-sub">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
+								</div>
+								<div class="row-profit pop-mono" style="color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}">
+									{formatProfit(m.net_profit)}
+								</div>
+							</a>
+						{/each}
+					{/if}
 				{/if}
 			</div>
 		{/if}

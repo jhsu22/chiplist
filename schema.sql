@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   hours REAL DEFAULT 0,
   group_id INTEGER REFERENCES groups(id),
   notes TEXT,
+  status TEXT NOT NULL DEFAULT 'approved',
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -61,35 +62,3 @@ CREATE TABLE IF NOT EXISTS session_entries (
 
 CREATE INDEX IF NOT EXISTS idx_entries_session ON session_entries(session_id);
 CREATE INDEX IF NOT EXISTS idx_entries_player ON session_entries(player_id);
-
--- Auth
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  display_name TEXT NOT NULL DEFAULT '',
-  created_at TEXT DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS auth_sessions (
-  token TEXT PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  expires_at TEXT NOT NULL
-);
-
--- Groups
-CREATE TABLE IF NOT EXISTS groups (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  description TEXT DEFAULT '',
-  invite_code TEXT UNIQUE NOT NULL,
-  owner_id INTEGER REFERENCES users(id),
-  created_at TEXT DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS group_members (
-  group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-  player_id INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-  joined_at TEXT DEFAULT (datetime('now')),
-  PRIMARY KEY (group_id, player_id)
-);

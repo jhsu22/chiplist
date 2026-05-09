@@ -1,8 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { getPlayers, createPlayer, deletePlayer, getSessions, getSessionEntries } from '$lib/db';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ platform }) => {
+export const load: PageServerLoad = async ({ platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const db = platform!.env.DB;
 	const [players, sessions] = await Promise.all([getPlayers(db), getSessions(db)]);
 

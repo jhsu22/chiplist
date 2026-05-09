@@ -63,6 +63,7 @@
 <style>
 .shell {
 	min-height: 100vh;
+	min-height: 100dvh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -75,6 +76,7 @@
 	width: 100%;
 	max-width: 430px;
 	min-height: 100vh;
+	min-height: 100dvh;
 	background: var(--bg);
 	display: flex;
 	flex-direction: column;

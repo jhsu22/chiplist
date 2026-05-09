@@ -1,6 +1,10 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
 	export let data: PageData;
+	export let form: ActionData;
+
+	let showJoin = false;
 </script>
 
 <svelte:head>
@@ -28,17 +32,44 @@
 	{:else}
 		<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
 			<div class="pop-display" style="font-size:28px; color:var(--ink)">Your groups</div>
-			<a href="/groups/new" style="background:var(--accent); color:white; padding:8px 16px; border-radius:999px; font-size:13px; font-weight:800; text-decoration:none; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink)">
-				+ New
-			</a>
+			<div style="display:flex; gap:8px">
+				<button type="button" on:click={() => showJoin = !showJoin}
+					style="background:{showJoin ? 'var(--cobalt-soft)' : 'var(--bg2)'}; color:{showJoin ? 'var(--cobalt)' : 'var(--ink2)'}; padding:8px 14px; border-radius:999px; font-size:13px; font-weight:800; text-decoration:none; border:2px solid {showJoin ? 'var(--cobalt)' : 'var(--rule)'}; cursor:pointer; font-family:inherit">
+					Join
+				</button>
+				<a href="/groups/new" style="background:var(--accent); color:white; padding:8px 16px; border-radius:999px; font-size:13px; font-weight:800; text-decoration:none; border:2px solid var(--ink); box-shadow:0 2px 0 var(--ink)">
+					+ New
+				</a>
+			</div>
 		</div>
+
+		{#if showJoin}
+			<form method="POST" action="?/join_group" use:enhance={() => async ({ result, update }) => {
+				await update();
+				if (result.type === 'success') showJoin = false;
+			}} style="margin-bottom:16px">
+				{#if form?.join_error}
+					<div style="font-size:12px; color:var(--neg); font-weight:700; margin-bottom:6px">{form.join_error}</div>
+				{/if}
+				{#if form?.join_success}
+					<div style="font-size:12px; color:var(--pos); font-weight:700; margin-bottom:6px">Joined!</div>
+				{/if}
+				<div style="display:flex; gap:8px">
+					<input type="text" name="invite_code" placeholder="Invite code (e.g. ABC12345)" required maxlength="8"
+						style="flex:1; padding:11px 13px; border-radius:12px; border:1.5px solid var(--cobalt); background:var(--card); font-family:monospace; font-size:14px; font-weight:700; color:var(--ink); outline:none; text-transform:uppercase"/>
+					<button type="submit"
+						style="padding:11px 16px; background:var(--cobalt); color:white; border-radius:12px; border:none; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit">
+						Join
+					</button>
+				</div>
+			</form>
+		{/if}
 
 		{#if data.groups.length === 0}
 			<div style="text-align:center; padding:30px 0">
 				<div style="font-size:13px; color:var(--ink3); margin-bottom:16px">You're not in any groups yet.</div>
-				<a href="/groups/new" style="color:var(--accent); font-weight:800; text-decoration:none; font-size:14px">Create one →</a>
-				<span style="color:var(--ink3); font-size:13px; margin:0 8px">or</span>
-				<a href="/profile" style="color:var(--cobalt); font-weight:800; text-decoration:none; font-size:14px">Join with a code →</a>
+				<a href="/groups/new" style="color:var(--accent); font-weight:800; text-decoration:none; font-size:14px">Create a group →</a>
+				<span style="color:var(--ink3); font-size:13px; margin:0 8px">or use a join code above</span>
 			</div>
 		{:else}
 			{#each data.groups as g}

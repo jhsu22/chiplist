@@ -1,8 +1,10 @@
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
+
 import { getPlayer, updatePlayer } from '$lib/db';
 
-export const load: PageServerLoad = async ({ params, platform }) => {
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const db = platform?.env?.DB;
 	if (!db) error(503, 'Database unavailable');
 

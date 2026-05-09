@@ -1,9 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
+
 import { getSession, getSessionEntries, getPlayers, upsertEntry, removeEntry, deleteSession } from '$lib/db';
 import { parseMoney } from '$lib/utils';
 
-export const load: PageServerLoad = async ({ params, platform }) => {
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const db = platform!.env.DB;
 	const id = Number(params.id);
 
