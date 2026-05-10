@@ -64,17 +64,6 @@
 		};
 	});
 
-	// ── iOS PWA viewport height fix ──────────────────────────────────────────
-	// 100dvh misreports the visual viewport in iOS standalone mode; use
-	// window.innerHeight which is always correct.
-	onMount(() => {
-		const setHeight = () =>
-			document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-		setHeight();
-		window.addEventListener('resize', setHeight);
-		return () => window.removeEventListener('resize', setHeight);
-	});
-
 	// ── Push notification subscription ──────────────────────────────────────
 	onMount(async () => {
 		if (!data.vapidPublicKey) return;
@@ -124,8 +113,9 @@
 		<div class="screen-inner pop-scroll" bind:this={screenInner}>
 			<slot />
 		</div>
-		<!-- Tab bar -->
-		<nav class="tabbar">
+	</div>
+	<!-- Tab bar pinned to visual viewport bottom -->
+	<nav class="tabbar">
 			<a href="/" class="tab" class:active={activeTab === 'home'}>
 				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={activeTab === 'home' ? 2.4 : 2} stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/>
@@ -162,14 +152,13 @@
 				</svg>
 				<span>Me</span>
 			</a>
-		</nav>
-	</div>
+	</nav>
 </div>
 
 <style>
 .shell {
+	height: 100vh;
 	height: 100dvh;
-	height: var(--app-height, 100dvh);
 	display: flex;
 	justify-content: center;
 	background: #ECEAE3;
@@ -193,7 +182,7 @@
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 	min-height: 0;
-	padding-bottom: 100px;
+	padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
 .ptr-wrap {
@@ -224,7 +213,12 @@
 @keyframes ptr-spin { to { transform: rotate(360deg); } }
 
 .tabbar {
-	flex-shrink: 0;
+	position: fixed;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100%;
+	max-width: 430px;
 	padding: 8px 8px max(28px, env(safe-area-inset-bottom));
 	background: rgba(255, 246, 236, 0.92);
 	backdrop-filter: blur(20px);
