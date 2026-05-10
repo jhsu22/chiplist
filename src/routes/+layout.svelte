@@ -176,6 +176,7 @@
 	position: relative;
 	width: 100%;
 	max-width: 430px;
+	height: 100%;
 	background: var(--bg);
 	display: flex;
 	flex-direction: column;
