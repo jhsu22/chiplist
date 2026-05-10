@@ -215,9 +215,7 @@
 .tabbar {
 	flex-shrink: 0;
 	padding: 8px 8px max(28px, env(safe-area-inset-bottom));
-	background: rgba(255, 246, 236, 0.92);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
+	background: var(--bg);
 	border-top: 1px solid var(--rule);
 	display: flex;
 	justify-content: space-around;
