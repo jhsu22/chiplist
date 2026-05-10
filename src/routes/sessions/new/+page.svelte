@@ -191,7 +191,7 @@
 </div>
 
 {#if step === 1}
-<div style="padding: 20px 20px 8px">
+<div style="padding: 20px 20px 160px">
 	<div style="font-size:13px; color:var(--accent); font-weight:800; letter-spacing:1.4px; text-transform:uppercase">Step 1</div>
 	<div class="pop-display" style="font-size:36px; margin-top:6px; line-height:1; color:var(--ink)">What's the<br/>setup?</div>
 
@@ -202,7 +202,7 @@
 	</div>
 	{#if dateChoice === 'Pick date'}
 		<input type="date" bind:value={customDate}
-			style="margin-top:8px; width:100%; padding:10px 12px; border-radius:12px; border:1.5px solid var(--rule); background:var(--card); font-family:inherit; font-size:14px; color:var(--ink); outline:none"/>
+			style="margin-top:8px; width:100%; max-width:100%; padding:10px 12px; border-radius:12px; border:1.5px solid var(--rule); background:var(--card); font-family:inherit; font-size:14px; color:var(--ink); outline:none; -webkit-appearance:none; appearance:none"/>
 	{/if}
 
 	<div class="field-label" style="margin-top:22px">Location</div>
@@ -277,7 +277,7 @@
 </div>
 
 {:else if step === 2}
-<div style="padding: 20px 20px 8px">
+<div style="padding: 20px 20px 160px">
 	<div style="font-size:13px; color:var(--accent); font-weight:800; letter-spacing:1.4px; text-transform:uppercase">Step 2</div>
 	<div class="pop-display" style="font-size:36px; margin-top:6px; line-height:1; color:var(--ink)">Who's<br/>seated? 🪑</div>
 	<div style="font-size:13px; color:var(--ink2); margin-top:8px">Tap to add. {selectedPlayers.length} selected.</div>
@@ -312,7 +312,7 @@
 </div>
 
 {:else}
-<div style="padding: 20px 20px 8px">
+<div style="padding: 20px 20px 160px">
 	<div style="font-size:13px; color:var(--accent); font-weight:800; letter-spacing:1.4px; text-transform:uppercase">Step 3</div>
 	<div class="pop-display" style="font-size:30px; margin-top:6px; line-height:1; color:var(--ink)">Final stacks &<br/>settle-up 💸</div>
 
@@ -470,7 +470,16 @@
 	border: 1.5px dashed var(--ink2); border-radius: 12px; font-size: 12px; font-weight: 800;
 	color: var(--ink2); text-align: center; cursor: pointer; font-family: inherit;
 }
-.cta-wrap { position: sticky; bottom: 16px; padding: 0 20px; z-index: 10; }
+.cta-wrap {
+	position: fixed;
+	bottom: 90px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100%;
+	max-width: 430px;
+	padding: 0 20px;
+	z-index: 10;
+}
 .cta-btn {
 	display: block; width: 100%; background: var(--ink); color: var(--bg);
 	padding: 16px 0; border-radius: 999px; text-align: center; font-size: 15px; font-weight: 800;

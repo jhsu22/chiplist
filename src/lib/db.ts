@@ -265,7 +265,10 @@ export async function getGroupMembers(
        FROM group_members gm
        JOIN players p ON p.id = gm.player_id
        LEFT JOIN session_entries se ON se.player_id = p.id
-       LEFT JOIN sessions s ON s.id = se.session_id AND s.group_id = ? AND (s.status = 'approved' OR s.status IS NULL)
+         AND se.session_id IN (
+           SELECT id FROM sessions
+           WHERE group_id = ? AND (status = 'approved' OR status IS NULL)
+         )
        WHERE gm.group_id = ?
        GROUP BY p.id, p.name
        ORDER BY net_profit DESC`
@@ -344,6 +347,14 @@ export async function getSettlement(db: D1Database, id: number): Promise<Settlem
 		.first<SettlementRecord>();
 }
 
+export async function getSessionSettlements(db: D1Database, session_id: number): Promise<SettlementRecord[]> {
+	const result = await db
+		.prepare('SELECT * FROM settlements WHERE session_id = ?')
+		.bind(session_id)
+		.all<SettlementRecord>();
+	return result.results;
+}
+
 export async function updateSettlementStatus(
 	db: D1Database,
 	id: number,
@@ -399,6 +410,7 @@ export async function getEnrichedNotifications(
          ON sess.id = n.related_id
          AND n.type IN ('session_pending', 'session_approved')
        WHERE n.user_id = ?
+         AND NOT (n.type = 'session_pending' AND sess.status IS NOT NULL AND sess.status != 'pending')
        ORDER BY n.read ASC, n.created_at DESC
        LIMIT 100`
 		)

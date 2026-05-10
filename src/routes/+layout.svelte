@@ -87,6 +87,7 @@
 	-webkit-overflow-scrolling: touch;
 	min-height: 0;
 	padding-bottom: 100px;
+	overscroll-behavior-y: none;
 }
 
 .tabbar {

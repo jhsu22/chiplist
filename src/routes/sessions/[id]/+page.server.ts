@@ -1,7 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 
-import { getSession, getSessionEntries, getPlayers, upsertEntry, removeEntry, deleteSession } from '$lib/db';
+import { getSession, getSessionEntries, getPlayers, getSessionSettlements, upsertEntry, removeEntry, deleteSession } from '$lib/db';
 import { parseMoney } from '$lib/utils';
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
@@ -9,15 +9,16 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 	const db = platform!.env.DB;
 	const id = Number(params.id);
 
-	const [session, entries, players] = await Promise.all([
+	const [session, entries, players, settlements] = await Promise.all([
 		getSession(db, id),
 		getSessionEntries(db, id),
-		getPlayers(db)
+		getPlayers(db),
+		getSessionSettlements(db, id)
 	]);
 
 	if (!session) error(404, 'Session not found');
 
-	return { session, entries, players };
+	return { session, entries, players, settlements };
 };
 
 export const actions: Actions = {

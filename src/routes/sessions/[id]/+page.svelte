@@ -80,13 +80,17 @@
 	{#each settlements as s}
 		{@const fromId = data.players.find(p => p.name === s.from_player)?.id ?? 0}
 		{@const toId = data.players.find(p => p.name === s.to_player)?.id ?? 0}
+		{@const dbS = data.settlements.find(r => r.from_player_id === fromId && r.to_player_id === toId)}
+		{@const sStatus = dbS?.status ?? 'pending'}
 		<div class="settle-row">
 			<div class="settle-avatar" style="background:{playerColor(fromId)}">{initials(s.from_player)}</div>
 			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
 			<div class="settle-avatar" style="background:{playerColor(toId)}">{initials(s.to_player)}</div>
 			<div class="settle-names">{s.from_player.split(' ')[0]} → {s.to_player.split(' ')[0]}</div>
 			<div class="settle-amt pop-mono">{formatMoney(s.amount)}</div>
-			<div class="settle-badge">UNPAID</div>
+			<div class="settle-badge" style="background:{sStatus === 'resolved' ? 'var(--pos-bg)' : sStatus === 'sent' ? 'var(--butter)' : 'var(--neg-bg)'}; color:{sStatus === 'resolved' ? 'var(--pos)' : sStatus === 'sent' ? 'var(--ink)' : 'var(--neg)'}">
+				{sStatus === 'resolved' ? 'PAID' : sStatus === 'sent' ? 'SENT' : 'UNPAID'}
+			</div>
 		</div>
 	{/each}
 </div>
