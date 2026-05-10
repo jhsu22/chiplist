@@ -1,17 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <circle cx="256" cy="256" r="256" fill="#FF6E4F"/>
-  <!-- Classic poker chip: 4 cream inlay tabs at NE/SE/SW/NW, ring r=200–245 -->
-  <path d="M429.2,82.8 A245,245 0 0,1 501,256 L456,256 A200,200 0 0,0 397.4,114.6 Z" fill="#FFF6EC"/>
-  <path d="M429.2,429.2 A245,245 0 0,1 256,501 L256,456 A200,200 0 0,0 397.4,397.4 Z" fill="#FFF6EC"/>
-  <path d="M82.8,429.2 A245,245 0 0,1 11,256 L56,256 A200,200 0 0,0 114.6,397.4 Z" fill="#FFF6EC"/>
-  <path d="M82.8,82.8 A245,245 0 0,1 256,11 L256,56 A200,200 0 0,0 114.6,114.6 Z" fill="#FFF6EC"/>
-  <!-- Ring borders -->
-  <circle cx="256" cy="256" r="245" fill="none" stroke="#1A1410" stroke-width="6"/>
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#1A1410" stroke-width="6"/>
-  <!-- Inner chip face -->
-  <circle cx="256" cy="256" r="190" fill="#FF6E4F"/>
-  <!-- Inner groove -->
-  <circle cx="256" cy="256" r="142" fill="none" stroke="#1A1410" stroke-width="14" opacity="0.22"/>
+  <!-- Chip body -->
+  <circle cx="256" cy="256" r="248" fill="#FF6E4F"/>
+
+  <!--
+    8 cream edge inserts at 45° intervals, each spanning 30° (±15°).
+    Each path: outer arc (r=248, CW) → line inward → inner arc (r=200, CCW) → close.
+    Coordinates computed as (256 ± r·cos θ, 256 ± r·sin θ) for θ = angle ± 15°.
+  -->
+  <!-- 0° (right) -->
+  <path d="M495.5,191.8 A248,248 0 0,1 495.5,320.2 L449.2,307.8 A200,200 0 0,0 449.2,204.2Z" fill="#FFF6EC"/>
+  <!-- 45° -->
+  <path d="M470.8,380 A248,248 0 0,1 380,470.8 L356,429.2 A200,200 0 0,0 429.2,356Z" fill="#FFF6EC"/>
+  <!-- 90° (bottom) -->
+  <path d="M320.2,495.5 A248,248 0 0,1 191.8,495.5 L204.2,449.2 A200,200 0 0,0 307.8,449.2Z" fill="#FFF6EC"/>
+  <!-- 135° -->
+  <path d="M132,470.8 A248,248 0 0,1 41.2,380 L82.8,356 A200,200 0 0,0 156,429.2Z" fill="#FFF6EC"/>
+  <!-- 180° (left) -->
+  <path d="M16.5,320.2 A248,248 0 0,1 16.5,191.8 L62.8,204.2 A200,200 0 0,0 62.8,307.8Z" fill="#FFF6EC"/>
+  <!-- 225° -->
+  <path d="M41.2,132 A248,248 0 0,1 132,41.2 L156,82.8 A200,200 0 0,0 82.8,156Z" fill="#FFF6EC"/>
+  <!-- 270° (top) -->
+  <path d="M191.8,16.5 A248,248 0 0,1 320.2,16.5 L307.8,62.8 A200,200 0 0,0 204.2,62.8Z" fill="#FFF6EC"/>
+  <!-- 315° -->
+  <path d="M380,41.2 A248,248 0 0,1 470.8,132 L429.2,156 A200,200 0 0,0 356,82.8Z" fill="#FFF6EC"/>
+
+  <!-- Ring borders: outer edge and inner rim -->
+  <circle cx="256" cy="256" r="248" fill="none" stroke="#1A1410" stroke-width="8"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#1A1410" stroke-width="8"/>
+
+  <!-- Center face -->
+  <circle cx="256" cy="256" r="130" fill="#FFF6EC"/>
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#1A1410" stroke-width="5" opacity="0.2"/>
+
   <!-- Center pip -->
-  <circle cx="256" cy="256" r="52" fill="#FFF6EC"/>
+  <circle cx="256" cy="256" r="32" fill="#FF6E4F"/>
 </svg>
