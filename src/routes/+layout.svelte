@@ -30,11 +30,15 @@
 		}
 
 		function onTouchMove(e: TouchEvent) {
-			if (!pulling) return;
 			const delta = e.touches[0].clientY - touchY0;
+			// Always block native top bounce — any downward pull at the top
+			// goes through our custom PTR instead of the browser elastic.
+			if (screenInner.scrollTop === 0 && delta > 0) {
+				e.preventDefault();
+			}
+			if (!pulling) return;
 			if (delta <= 0) { pulling = false; pullDelta = 0; return; }
 			pullDelta = Math.min(delta * 0.45, 72);
-			if (pullDelta > 4) e.preventDefault();
 		}
 
 		async function onTouchEnd() {
@@ -190,7 +194,6 @@
 	-webkit-overflow-scrolling: touch;
 	min-height: 0;
 	padding-bottom: 100px;
-	overscroll-behavior-y: none;
 }
 
 .ptr-wrap {
