@@ -122,8 +122,15 @@
 <!-- ── RECENT / HISTORY ── -->
 {#if informational.length > 0}
 	<div style="margin:24px 20px 0">
-		<div style="font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink2); margin-bottom:10px">
-			{actionable.length > 0 ? 'Recent' : 'Notifications'}
+		<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+			<div style="font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink2)">
+				{actionable.length > 0 ? 'Recent' : 'Notifications'}
+			</div>
+			<form method="POST" action="?/clear_resolved" use:enhance={() => ({ update }) => update()}>
+				<button type="submit" style="font-size:11px; font-weight:800; color:var(--ink3); background:none; border:none; cursor:pointer; font-family:inherit; padding:0">
+					Clear
+				</button>
+			</form>
 		</div>
 		<div style="display:flex; flex-direction:column; gap:1px; background:var(--rule); border-radius:16px; overflow:hidden; border:1.5px solid var(--ink)">
 			{#each informational as n, i (n.id)}

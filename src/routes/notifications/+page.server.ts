@@ -7,7 +7,8 @@ import {
 	getSettlement,
 	updateSettlementStatus,
 	createNotification,
-	getPlayer
+	getPlayer,
+	clearResolvedNotifications
 } from '$lib/db';
 import { formatMoney } from '$lib/utils';
 
@@ -25,6 +26,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 };
 
 export const actions: Actions = {
+	clear_resolved: async ({ platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform?.env?.DB;
+		if (!db) return fail(503, { error: 'Database unavailable' });
+		await clearResolvedNotifications(db, locals.user.id);
+		return { cleared: true };
+	},
+
 	mark_sent: async ({ request, platform, locals }) => {
 		if (!locals.user) return fail(401, { error: 'Not logged in' });
 		const db = platform?.env?.DB;

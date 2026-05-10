@@ -2,7 +2,8 @@ import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 import {
 	getGroupById, getGroupMembers, getGroupSessions, getPendingGroupSessions,
-	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession, getSession
+	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession, getSession,
+	dismissSessionPendingNotification
 } from '$lib/db';
 import { notifySessionApproved } from '$lib/notifications';
 
@@ -71,6 +72,7 @@ export const actions: Actions = {
 
 		const session = await getSession(db, sessionId);
 		await approveSession(db, sessionId);
+		await dismissSessionPendingNotification(db, sessionId);
 
 		if (session) {
 			await notifySessionApproved(db, sessionId, session.name);

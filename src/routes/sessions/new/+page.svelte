@@ -472,7 +472,7 @@
 }
 .cta-wrap {
 	position: fixed;
-	bottom: 90px;
+	bottom: 100px;
 	left: 50%;
 	transform: translateX(-50%);
 	width: 100%;

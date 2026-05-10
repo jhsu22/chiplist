@@ -11,5 +11,5 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
 		}
 		cookies.delete('chiplist_session', { path: '/' });
 	}
-	redirect(302, '/');
+	redirect(302, '/login');
 };

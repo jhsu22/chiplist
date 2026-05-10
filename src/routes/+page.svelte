@@ -290,7 +290,7 @@
 
 .hero-label { font-size:13px; color:var(--ink2); }
 .hero-title { font-size:18px; font-weight:700; color:var(--ink); margin-top:2px; }
-.hero-number { font-size:60px; line-height:0.9; font-weight:800; letter-spacing:-0.04em; margin-top:14px; }
+.hero-number { font-size:60px; line-height:0.9; font-weight:900; letter-spacing:-0.02em; margin-top:14px; }
 .pos { color:var(--pos); }
 .neg { color:var(--neg); }
 

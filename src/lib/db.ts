@@ -139,6 +139,7 @@ export async function getPlayerEntries(
        FROM session_entries se
        JOIN sessions s ON s.id = se.session_id
        WHERE se.player_id = ?
+         AND (s.status = 'approved' OR s.status IS NULL)
        ORDER BY s.date DESC`
 		)
 		.bind(player_id)
@@ -433,4 +434,25 @@ export async function markNotificationRead(db: D1Database, id: number): Promise<
 
 export async function markAllNotificationsRead(db: D1Database, user_id: number): Promise<void> {
 	await db.prepare('UPDATE notifications SET read = 1 WHERE user_id = ?').bind(user_id).run();
+}
+
+export async function dismissSessionPendingNotification(db: D1Database, sessionId: number): Promise<void> {
+	await db
+		.prepare("DELETE FROM notifications WHERE type = 'session_pending' AND related_id = ?")
+		.bind(sessionId)
+		.run();
+}
+
+export async function clearResolvedNotifications(db: D1Database, user_id: number): Promise<void> {
+	await db
+		.prepare(
+			`DELETE FROM notifications WHERE user_id = ?
+       AND NOT (
+         (type = 'session_pending' AND related_id IN (SELECT id FROM sessions WHERE status = 'pending'))
+         OR (type = 'you_owe'       AND related_id IN (SELECT id FROM settlements WHERE status = 'pending'))
+         OR (type = 'payment_sent'  AND related_id IN (SELECT id FROM settlements WHERE status = 'sent'))
+       )`
+		)
+		.bind(user_id)
+		.run();
 }
