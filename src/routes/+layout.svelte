@@ -167,7 +167,6 @@
 	height: 100dvh;
 	height: var(--app-height, 100dvh);
 	display: flex;
-	align-items: center;
 	justify-content: center;
 	background: #ECEAE3;
 	overflow: hidden;
@@ -177,7 +176,6 @@
 	position: relative;
 	width: 100%;
 	max-width: 430px;
-	height: 100%;
 	background: var(--bg);
 	display: flex;
 	flex-direction: column;
