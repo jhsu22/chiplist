@@ -1,6 +1,10 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+
+	export let data: { vapidPublicKey?: string | null; [k: string]: unknown };
 
 	$: path = $page.url.pathname;
 	$: activeTab =
@@ -9,11 +13,100 @@
 		path.startsWith('/sessions') ? 'sessions' :
 		path.startsWith('/groups') ? 'groups' :
 		path.startsWith('/profile') || path.startsWith('/players') ? 'me' : 'home';
+
+	// ── Pull-to-refresh ──────────────────────────────────────────────────────
+	let screenInner: HTMLElement;
+	let pullDelta = 0;
+	let pulling = false;
+	let refreshing = false;
+	let touchY0 = 0;
+
+	onMount(() => {
+		function onTouchStart(e: TouchEvent) {
+			if (screenInner.scrollTop === 0 && !refreshing) {
+				touchY0 = e.touches[0].clientY;
+				pulling = true;
+			}
+		}
+
+		function onTouchMove(e: TouchEvent) {
+			if (!pulling) return;
+			const delta = e.touches[0].clientY - touchY0;
+			if (delta <= 0) { pulling = false; pullDelta = 0; return; }
+			pullDelta = Math.min(delta * 0.45, 72);
+			if (pullDelta > 4) e.preventDefault();
+		}
+
+		async function onTouchEnd() {
+			if (!pulling) return;
+			const triggered = pullDelta > 52;
+			pulling = false;
+			if (triggered) {
+				refreshing = true;
+				pullDelta = 44;
+				await invalidateAll();
+				refreshing = false;
+			}
+			pullDelta = 0;
+		}
+
+		screenInner.addEventListener('touchstart', onTouchStart, { passive: true });
+		screenInner.addEventListener('touchmove', onTouchMove, { passive: false });
+		screenInner.addEventListener('touchend', onTouchEnd, { passive: true });
+		return () => {
+			screenInner.removeEventListener('touchstart', onTouchStart);
+			screenInner.removeEventListener('touchmove', onTouchMove);
+			screenInner.removeEventListener('touchend', onTouchEnd);
+		};
+	});
+
+	// ── Push notification subscription ──────────────────────────────────────
+	onMount(async () => {
+		if (!data.vapidPublicKey) return;
+		if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+		try {
+			const reg = await navigator.serviceWorker.ready;
+			const existing = await reg.pushManager.getSubscription();
+			if (!existing) return; // only auto-subscribe if user has explicitly opted in
+		} catch {}
+	});
+
+	export async function subscribeToPush(): Promise<boolean> {
+		if (!data.vapidPublicKey) return false;
+		try {
+			const perm = await Notification.requestPermission();
+			if (perm !== 'granted') return false;
+
+			const reg = await navigator.serviceWorker.ready;
+			const sub = await reg.pushManager.subscribe({
+				userVisibleOnly: true,
+				applicationServerKey: data.vapidPublicKey
+			});
+			const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+			await fetch('/api/push', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(json)
+			});
+			return true;
+		} catch {
+			return false;
+		}
+	}
 </script>
 
 <div class="shell">
 	<div class="screen">
-		<div class="screen-inner pop-scroll">
+		<!-- Pull-to-refresh indicator (floats above content) -->
+		{#if pullDelta > 6}
+			<div class="ptr-wrap" style="opacity:{Math.min(pullDelta / 52, 1)}">
+				<div class="ptr-spinner" class:spinning={refreshing}
+					style="transform:rotate({refreshing ? 0 : (pullDelta / 72) * 270}deg)"></div>
+			</div>
+		{/if}
+
+		<div class="screen-inner pop-scroll" bind:this={screenInner}>
 			<slot />
 		</div>
 		<!-- Tab bar -->
@@ -77,7 +170,6 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	/* Push content below the iOS status bar */
 	padding-top: env(safe-area-inset-top);
 }
 
@@ -89,6 +181,33 @@
 	padding-bottom: 100px;
 	overscroll-behavior-y: none;
 }
+
+.ptr-wrap {
+	position: absolute;
+	top: calc(env(safe-area-inset-top) + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 200;
+	background: var(--card);
+	border-radius: 999px;
+	padding: 8px;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+	pointer-events: none;
+}
+
+.ptr-spinner {
+	width: 20px;
+	height: 20px;
+	border: 2.5px solid var(--rule);
+	border-top-color: var(--ink);
+	border-radius: 50%;
+}
+
+.ptr-spinner.spinning {
+	animation: ptr-spin 0.7s linear infinite;
+}
+
+@keyframes ptr-spin { to { transform: rotate(360deg); } }
 
 .tabbar {
 	flex-shrink: 0;

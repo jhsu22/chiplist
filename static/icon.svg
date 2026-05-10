@@ -1,10 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background -->
   <circle cx="256" cy="256" r="256" fill="#FF6E4F"/>
-  <!-- Outer chip groove ring -->
-  <circle cx="256" cy="256" r="172" fill="none" stroke="#FFF6EC" stroke-width="26" opacity="0.55"/>
-  <!-- Inner chip groove ring -->
-  <circle cx="256" cy="256" r="106" fill="none" stroke="#FFF6EC" stroke-width="20" opacity="0.75"/>
+  <!-- Classic poker chip: 4 cream inlay tabs at NE/SE/SW/NW, ring r=200–245 -->
+  <path d="M429.2,82.8 A245,245 0 0,1 501,256 L456,256 A200,200 0 0,0 397.4,114.6 Z" fill="#FFF6EC"/>
+  <path d="M429.2,429.2 A245,245 0 0,1 256,501 L256,456 A200,200 0 0,0 397.4,397.4 Z" fill="#FFF6EC"/>
+  <path d="M82.8,429.2 A245,245 0 0,1 11,256 L56,256 A200,200 0 0,0 114.6,397.4 Z" fill="#FFF6EC"/>
+  <path d="M82.8,82.8 A245,245 0 0,1 256,11 L256,56 A200,200 0 0,0 114.6,114.6 Z" fill="#FFF6EC"/>
+  <!-- Ring borders -->
+  <circle cx="256" cy="256" r="245" fill="none" stroke="#1A1410" stroke-width="6"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#1A1410" stroke-width="6"/>
+  <!-- Inner chip face -->
+  <circle cx="256" cy="256" r="190" fill="#FF6E4F"/>
+  <!-- Inner groove -->
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#1A1410" stroke-width="14" opacity="0.22"/>
   <!-- Center pip -->
-  <circle cx="256" cy="256" r="48" fill="#FFF6EC" opacity="0.9"/>
+  <circle cx="256" cy="256" r="52" fill="#FFF6EC"/>
 </svg>

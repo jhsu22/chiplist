@@ -6,5 +6,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	if (locals.user && platform?.env?.DB) {
 		unreadCount = await getUnreadNotificationCount(platform.env.DB, locals.user.id);
 	}
-	return { user: locals.user, unreadCount };
+	return {
+		user: locals.user,
+		unreadCount,
+		vapidPublicKey: platform?.env?.VAPID_PUBLIC_KEY ?? null
+	};
 };

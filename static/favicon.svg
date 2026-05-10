@@ -1,28 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- 3D poker chip, off-axis, Pop style -->
-
-  <!-- Drop shadow -->
-  <ellipse cx="33" cy="56" rx="19" ry="5" fill="#1A1410" opacity="0.12"/>
-
-  <!-- Chip edge / side wall (dark coral, gives 3D depth) -->
-  <!-- Fills the space between top-face ellipse and bottom arc -->
-  <path d="M8,23 L8,35 Q32,53 56,35 L56,23" fill="#C24030" stroke="#1A1410" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-
-  <!-- Cream inserts on the visible edge (4 segments, characteristic poker chip look) -->
-  <ellipse cx="13"  cy="33" rx="2.8" ry="5.5" fill="#FFF6EC" stroke="#1A1410" stroke-width="1.2" transform="rotate(-28 13 33)"/>
-  <ellipse cx="26"  cy="41" rx="2.8" ry="5"   fill="#FFF6EC" stroke="#1A1410" stroke-width="1.2" transform="rotate(-8 26 41)"/>
-  <ellipse cx="38"  cy="41" rx="2.8" ry="5"   fill="#FFF6EC" stroke="#1A1410" stroke-width="1.2" transform="rotate(8 38 41)"/>
-  <ellipse cx="51"  cy="33" rx="2.8" ry="5.5" fill="#FFF6EC" stroke="#1A1410" stroke-width="1.2" transform="rotate(28 51 33)"/>
-
-  <!-- Chip face (top ellipse) — coral -->
-  <ellipse cx="32" cy="23" rx="24" ry="9.5" fill="#FF6E4F" stroke="#1A1410" stroke-width="2.5"/>
-
-  <!-- Outer groove ring -->
-  <ellipse cx="32" cy="23" rx="18.5" ry="7.5" fill="none" stroke="#1A1410" stroke-width="1.5"/>
-
-  <!-- Inner cream inlay -->
-  <ellipse cx="32" cy="23" rx="12.5" ry="5" fill="#FFF6EC" stroke="#1A1410" stroke-width="1.5"/>
-
-  <!-- Center pip -->
-  <ellipse cx="32" cy="23" rx="4.5" ry="1.8" fill="#FF6E4F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="32" fill="#FF6E4F"/>
+  <path d="M51.8,12.2 A28,28 0 0,1 60,32 L54,32 A22,22 0 0,0 47.6,16.4 Z" fill="#FFF6EC"/>
+  <path d="M51.8,51.8 A28,28 0 0,1 32,60 L32,54 A22,22 0 0,0 47.6,47.6 Z" fill="#FFF6EC"/>
+  <path d="M12.2,51.8 A28,28 0 0,1 4,32 L10,32 A22,22 0 0,0 16.4,47.6 Z" fill="#FFF6EC"/>
+  <path d="M12.2,12.2 A28,28 0 0,1 32,4 L32,10 A22,22 0 0,0 16.4,16.4 Z" fill="#FFF6EC"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#1A1410" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#1A1410" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="20" fill="#FF6E4F"/>
+  <circle cx="32" cy="32" r="14" fill="none" stroke="#1A1410" stroke-width="2" opacity="0.25"/>
+  <circle cx="32" cy="32" r="6" fill="#FFF6EC"/>
 </svg>

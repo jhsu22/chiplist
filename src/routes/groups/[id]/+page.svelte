@@ -140,6 +140,10 @@
 		<div style="margin-bottom:10px; padding:10px 12px; background:var(--pos-bg); border:1.5px solid var(--pos); border-radius:10px; font-size:13px; font-weight:700; color:var(--pos)">Player added!</div>
 	{/if}
 
+	{#if data.isLeader && data.members.length > 0}
+		<div style="font-size:10px; color:var(--ink3); font-weight:700; margin-bottom:8px">Tap × to remove a member</div>
+	{/if}
+
 	{#if data.members.length === 0}
 		<div style="font-size:13px; color:var(--ink3); text-align:center; padding:20px 0">
 			No members yet. Add players above to get started.
@@ -164,17 +168,26 @@
 			<div style="margin-top:8px; background:var(--card); border:1.5px solid var(--rule); border-radius:18px; overflow:hidden">
 				{#each rest as m, i}
 					{@const isLast = i === rest.length - 1}
-					<a href="/players/{m.player_id}" style="display:flex; align-items:center; padding:12px 14px; border-bottom:{isLast ? 'none' : '1px solid var(--rule)'}; text-decoration:none; color:inherit">
-						<div style="width:22px; font-size:13px; font-weight:800; color:var(--ink3)">#{i + 4}</div>
-						<div style="width:36px; height:36px; border-radius:999px; background:{playerColor(m.player_id)}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#3A2E1A; margin-right:10px; flex-shrink:0">{initials(m.player_name)}</div>
-						<div style="flex:1">
-							<div style="font-size:14px; font-weight:800; color:var(--ink)">{m.player_name}</div>
-							<div style="font-size:11px; color:var(--ink2); margin-top:1px">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
-						</div>
-						<div style="font-size:15px; font-weight:800; font-feature-settings:'tnum' 1; color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}">
-							{formatProfit(m.net_profit)}
-						</div>
-					</a>
+					<div style="display:flex; align-items:center; padding:12px 14px; border-bottom:{isLast ? 'none' : '1px solid var(--rule)'}">
+						<a href="/players/{m.player_id}" style="display:flex; align-items:center; flex:1; text-decoration:none; color:inherit; min-width:0">
+							<div style="width:22px; font-size:13px; font-weight:800; color:var(--ink3); flex-shrink:0">#{i + 4}</div>
+							<div style="width:36px; height:36px; border-radius:999px; background:{playerColor(m.player_id)}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#3A2E1A; margin-right:10px; flex-shrink:0">{initials(m.player_name)}</div>
+							<div style="flex:1; min-width:0">
+								<div style="font-size:14px; font-weight:800; color:var(--ink)">{m.player_name}</div>
+								<div style="font-size:11px; color:var(--ink2); margin-top:1px">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
+							</div>
+							<div style="font-size:15px; font-weight:800; font-feature-settings:'tnum' 1; color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}; margin-right:{data.isLeader ? '10px' : '0'}">
+								{formatProfit(m.net_profit)}
+							</div>
+						</a>
+						{#if data.isLeader}
+							<form method="POST" action="?/remove_member" use:enhance>
+								<input type="hidden" name="player_id" value={m.player_id}/>
+								<button type="submit" style="width:28px;height:28px;border-radius:999px;background:var(--neg-bg);border:1px solid var(--neg);color:var(--neg);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit"
+									on:click={(e) => { if (!confirm(`Remove ${m.player_name} from group?`)) e.preventDefault(); }}>×</button>
+							</form>
+						{/if}
+					</div>
 				{/each}
 			</div>
 		{/if}
@@ -183,17 +196,26 @@
 		<div style="background:var(--card); border:1.5px solid var(--rule); border-radius:18px; overflow:hidden">
 			{#each data.members as m, i}
 				{@const isLast = i === data.members.length - 1}
-				<a href="/players/{m.player_id}" style="display:flex; align-items:center; padding:12px 14px; border-bottom:{isLast ? 'none' : '1px solid var(--rule)'}; text-decoration:none; color:inherit">
-					<div style="width:22px; font-size:13px; font-weight:800; color:{i < 3 ? 'var(--accent)' : 'var(--ink3)'}">#{i + 1}</div>
-					<div style="width:36px; height:36px; border-radius:999px; background:{playerColor(m.player_id)}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#3A2E1A; margin-right:10px; flex-shrink:0">{initials(m.player_name)}</div>
-					<div style="flex:1">
-						<div style="font-size:14px; font-weight:800; color:var(--ink)">{m.player_name}</div>
-						<div style="font-size:11px; color:var(--ink2); margin-top:1px">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
-					</div>
-					<div style="font-size:15px; font-weight:800; font-feature-settings:'tnum' 1; color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}">
-						{formatProfit(m.net_profit)}
-					</div>
-				</a>
+				<div style="display:flex; align-items:center; padding:12px 14px; border-bottom:{isLast ? 'none' : '1px solid var(--rule)'}">
+					<a href="/players/{m.player_id}" style="display:flex; align-items:center; flex:1; text-decoration:none; color:inherit; min-width:0">
+						<div style="width:22px; font-size:13px; font-weight:800; color:{i < 3 ? 'var(--accent)' : 'var(--ink3)'}; flex-shrink:0">#{i + 1}</div>
+						<div style="width:36px; height:36px; border-radius:999px; background:{playerColor(m.player_id)}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#3A2E1A; margin-right:10px; flex-shrink:0">{initials(m.player_name)}</div>
+						<div style="flex:1; min-width:0">
+							<div style="font-size:14px; font-weight:800; color:var(--ink)">{m.player_name}</div>
+							<div style="font-size:11px; color:var(--ink2); margin-top:1px">{m.sessions} sess · {Math.round(m.win_rate * 100)}% win</div>
+						</div>
+						<div style="font-size:15px; font-weight:800; font-feature-settings:'tnum' 1; color:{m.net_profit >= 0 ? 'var(--pos)' : 'var(--neg)'}; margin-right:{data.isLeader ? '10px' : '0'}">
+							{formatProfit(m.net_profit)}
+						</div>
+					</a>
+					{#if data.isLeader}
+						<form method="POST" action="?/remove_member" use:enhance>
+							<input type="hidden" name="player_id" value={m.player_id}/>
+							<button type="submit" style="width:28px;height:28px;border-radius:999px;background:var(--neg-bg);border:1px solid var(--neg);color:var(--neg);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit"
+								on:click={(e) => { if (!confirm(`Remove ${m.player_name} from group?`)) e.preventDefault(); }}>×</button>
+						</form>
+					{/if}
+				</div>
 			{/each}
 		</div>
 	{/if}

@@ -3,7 +3,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import {
 	getGroupById, getGroupMembers, getGroupSessions, getPendingGroupSessions,
 	createPlayer, addGroupMember, getPlayers, approveSession, deleteSession, getSession,
-	dismissSessionPendingNotification
+	dismissSessionPendingNotification, removeGroupMember
 } from '$lib/db';
 import { notifySessionApproved } from '$lib/notifications';
 
@@ -75,10 +75,26 @@ export const actions: Actions = {
 		await dismissSessionPendingNotification(db, sessionId);
 
 		if (session) {
-			await notifySessionApproved(db, sessionId, session.name);
+			await notifySessionApproved(db, sessionId, session.name, platform?.env);
 		}
 
 		return { approve_success: true };
+	},
+
+	remove_member: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform?.env?.DB;
+		if (!db) return fail(503, { error: 'Database unavailable' });
+
+		const group = await getGroupById(db, Number(params.id));
+		if (!group || group.owner_id !== locals.user.id) return fail(403, { error: 'Not authorized' });
+
+		const data = await request.formData();
+		const playerId = Number(data.get('player_id'));
+		if (!playerId) return fail(400, { error: 'Missing player id' });
+
+		await removeGroupMember(db, Number(params.id), playerId);
+		return { remove_success: true };
 	},
 
 	reject_session: async ({ params, request, platform, locals }) => {

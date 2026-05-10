@@ -443,6 +443,59 @@ export async function dismissSessionPendingNotification(db: D1Database, sessionI
 		.run();
 }
 
+// ── Push Subscriptions ────────────────────────────────────────────────────────
+
+export async function upsertPushSubscription(
+	db: D1Database,
+	user_id: number,
+	endpoint: string,
+	p256dh: string,
+	auth: string
+): Promise<void> {
+	await db
+		.prepare(
+			`INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(user_id, endpoint) DO UPDATE SET p256dh = excluded.p256dh, auth = excluded.auth`
+		)
+		.bind(user_id, endpoint, p256dh, auth)
+		.run();
+}
+
+export async function deletePushSubscription(db: D1Database, user_id: number, endpoint: string): Promise<void> {
+	await db
+		.prepare('DELETE FROM push_subscriptions WHERE user_id = ? AND endpoint = ?')
+		.bind(user_id, endpoint)
+		.run();
+}
+
+export async function getPushSubscriptions(
+	db: D1Database,
+	user_id: number
+): Promise<{ endpoint: string; p256dh: string; auth: string }[]> {
+	const result = await db
+		.prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?')
+		.bind(user_id)
+		.all<{ endpoint: string; p256dh: string; auth: string }>();
+	return result.results;
+}
+
+// ── Account management ────────────────────────────────────────────────────────
+
+export async function deleteUserAccount(db: D1Database, user_id: number): Promise<void> {
+	// Unlink player profile before deleting (player stays, just not linked to an account)
+	await db.prepare('UPDATE players SET user_id = NULL WHERE user_id = ?').bind(user_id).run();
+	// Cascade deletes auth_sessions, notifications, push_subscriptions
+	await db.prepare('DELETE FROM users WHERE id = ?').bind(user_id).run();
+}
+
+export async function removeGroupMember(db: D1Database, group_id: number, player_id: number): Promise<void> {
+	await db
+		.prepare('DELETE FROM group_members WHERE group_id = ? AND player_id = ?')
+		.bind(group_id, player_id)
+		.run();
+}
+
 export async function clearResolvedNotifications(db: D1Database, user_id: number): Promise<void> {
 	await db
 		.prepare(

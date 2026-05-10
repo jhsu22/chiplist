@@ -1,8 +1,9 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
+import { deleteAuthSession } from '$lib/db';
 import {
 	getPlayers, getPlayerByUserId, updateUserDisplayName,
-	getUserGroups, getGroupByInviteCode, addGroupMember, createPlayer
+	getUserGroups, getGroupByInviteCode, addGroupMember, createPlayer, deleteUserAccount
 } from '$lib/db';
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
@@ -63,5 +64,18 @@ export const actions: Actions = {
 		}
 
 		return { join_success: true };
+	},
+
+	delete_account: async ({ locals, platform, cookies }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform?.env?.DB;
+		if (!db) return fail(503, { error: 'Database unavailable' });
+
+		const token = cookies.get('chiplist_session');
+		if (token) await deleteAuthSession(db, token);
+		cookies.delete('chiplist_session', { path: '/' });
+
+		await deleteUserAccount(db, locals.user.id);
+		redirect(302, '/login');
 	}
 };

@@ -85,13 +85,13 @@ export const actions: Actions = {
 
 		if (status === 'pending' && group_id) {
 			if (groupOwnerId) {
-				await notifyGroupLeaderPending(db, id, name, groupOwnerId);
+				await notifyGroupLeaderPending(db, id, name, groupOwnerId, platform?.env);
 			}
 			redirect(302, `/groups/${group_id}?submitted=pending`);
 		}
 
 		// Session is immediately approved — notify participants and create settlements
-		await notifySessionApproved(db, id, name);
+		await notifySessionApproved(db, id, name, platform?.env);
 		redirect(302, `/sessions/${id}`);
 	}
 };

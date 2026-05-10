@@ -2,11 +2,53 @@
 	import type { PageData, ActionData } from './$types';
 	import { initials, playerColor } from '$lib/utils';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
 
 	$: user = data.user!;
+
+	let pushState: 'unsupported' | 'denied' | 'off' | 'on' = 'unsupported';
+	let pushLoading = false;
+
+	onMount(async () => {
+		if (!$page.data.vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+		const perm = Notification.permission;
+		if (perm === 'denied') { pushState = 'denied'; return; }
+		const reg = await navigator.serviceWorker.ready;
+		const sub = await reg.pushManager.getSubscription();
+		pushState = sub ? 'on' : 'off';
+	});
+
+	async function togglePush() {
+		pushLoading = true;
+		try {
+			if (pushState === 'on') {
+				const reg = await navigator.serviceWorker.ready;
+				const sub = await reg.pushManager.getSubscription();
+				if (sub) {
+					await fetch('/api/push', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) });
+					await sub.unsubscribe();
+				}
+				pushState = 'off';
+			} else {
+				const perm = await Notification.requestPermission();
+				if (perm !== 'granted') { pushState = 'denied'; return; }
+				const reg = await navigator.serviceWorker.ready;
+				const sub = await reg.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: $page.data.vapidPublicKey
+				});
+				const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+				await fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(json) });
+				pushState = 'on';
+			}
+		} finally {
+			pushLoading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -99,6 +141,38 @@
 		<button type="submit"
 			style="padding:11px 16px; background:var(--cobalt); color:white; border-radius:12px; border:none; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit">
 			Join
+		</button>
+	</form>
+</div>
+
+<!-- Push notifications toggle -->
+{#if pushState !== 'unsupported'}
+<div style="margin:12px 20px 0; background:var(--card); border:1.5px solid var(--rule); border-radius:20px; padding:18px">
+	<div style="display:flex; justify-content:space-between; align-items:center">
+		<div>
+			<div style="font-size:12px; font-weight:800; letter-spacing:1.3px; text-transform:uppercase; color:var(--ink2); margin-bottom:2px">Push notifications</div>
+			<div style="font-size:12px; color:var(--ink3)">
+				{pushState === 'denied' ? 'Blocked in browser settings' : pushState === 'on' ? 'Enabled' : 'Disabled'}
+			</div>
+		</div>
+		{#if pushState !== 'denied'}
+			<button type="button" on:click={togglePush} disabled={pushLoading}
+				style="padding:8px 16px; border-radius:999px; border:none; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; transition:background 0.15s;
+					background:{pushState === 'on' ? 'var(--neg-bg)' : 'var(--cobalt)'}; color:{pushState === 'on' ? 'var(--neg)' : 'white'}">
+				{pushLoading ? '…' : pushState === 'on' ? 'Turn off' : 'Enable'}
+			</button>
+		{/if}
+	</div>
+</div>
+{/if}
+
+<!-- Danger zone: delete account -->
+<div style="margin:12px 20px 0; background:var(--card); border:1.5px solid var(--rule); border-radius:20px; padding:18px">
+	<div style="font-size:12px; font-weight:800; letter-spacing:1.3px; text-transform:uppercase; color:var(--neg); margin-bottom:12px">Danger zone</div>
+	<form method="POST" action="?/delete_account" use:enhance>
+		<button type="submit" style="width:100%; padding:11px; background:var(--neg-bg); color:var(--neg); border-radius:12px; border:1.5px solid var(--neg); font-size:13px; font-weight:800; cursor:pointer; font-family:inherit"
+			on:click={(e) => { if (!confirm('Delete your account? This cannot be undone. Your player profile and history will remain.')) e.preventDefault(); }}>
+			Delete account
 		</button>
 	</form>
 </div>
