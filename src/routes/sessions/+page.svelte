@@ -34,12 +34,15 @@
 						<div style="font-size:16px; font-weight:800; color:var(--ink)">{s.location || s.name}</div>
 						<div style="font-size:11px; color:var(--ink2); margin-top:2px; font-weight:700">{s.date}</div>
 					</div>
+					{#if s.status === 'pending'}
+						<span style="padding:3px 9px; border-radius:999px; background:var(--butter); font-size:10px; font-weight:800; color:var(--ink); letter-spacing:0.8px; text-transform:uppercase; white-space:nowrap">Pending</span>
+					{/if}
 				</div>
 				<div class="chips">
 					{#if s.blinds}<span class="chip">{s.blinds}</span>{/if}
 					{#if s.player_count > 0}<span class="chip">{s.player_count} seats</span>{/if}
 					{#if s.hours}<span class="chip">{s.hours}h</span>{/if}
-					{#if s.top_winner?.name}
+					{#if s.top_winner?.name && s.status !== 'pending'}
 						<span class="chip chip-pos">
 							👑 {s.top_winner.name.split(' ')[0]} {formatProfit(s.top_winner.net)}
 						</span>

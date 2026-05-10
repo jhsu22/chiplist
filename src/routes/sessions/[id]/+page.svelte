@@ -7,6 +7,8 @@
 
 	$: entries = data.entries;
 	$: session = data.session;
+	$: isLeader = data.isLeader;
+	$: isPending = session.status === 'pending';
 	$: sorted = [...entries].sort((a, b) => (b.cash_out - b.buy_in) - (a.cash_out - a.buy_in));
 	$: totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
 	$: settlements = calculateSettlements(
@@ -24,16 +26,28 @@
 		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
 	</a>
 	<div style="display:flex; align-items:center; gap:8px">
-		<a href="/sessions/{session.id}/edit" class="edit-btn">Edit</a>
-		<form method="POST" action="?/delete_session" use:enhance>
-		<button type="submit" class="delete-btn" on:click={(e) => { if (!confirm('Delete this session?')) e.preventDefault(); }}>
-			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
-			</svg>
-		</button>
-		</form>
+		{#if isLeader}
+			<a href="/sessions/{session.id}/edit" class="edit-btn">Edit</a>
+			<form method="POST" action="?/delete_session" use:enhance>
+			<button type="submit" class="delete-btn" on:click={(e) => { if (!confirm('Delete this session?')) e.preventDefault(); }}>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+				</svg>
+			</button>
+			</form>
+		{/if}
 	</div>
 </div>
+
+{#if isPending}
+<div style="margin:16px 20px 0; padding:12px 14px; background:var(--butter); border:1.5px solid var(--ink); border-radius:14px; font-size:13px; font-weight:700; color:var(--ink)">
+	{#if isLeader}
+		Pending your approval — results won't count toward bankrolls until approved.
+	{:else}
+		Awaiting leader approval — results won't count toward bankrolls until approved.
+	{/if}
+</div>
+{/if}
 
 <!-- Hero -->
 <div style="padding: 20px 20px 0">
@@ -97,9 +111,9 @@
 {/if}
 
 <!-- Add/edit entries (inline, below the design) -->
-{#if entries.length === 0}
+{#if entries.length === 0 && isLeader}
 <div style="padding: 24px 20px 0">
-	<a href="/sessions/{session.id}/entries" style="display:block; text-align:center; padding:14px; background:var(--bg2); border-radius:14px; border:1.5px dashed var(--ink2); font-size:13px; font-weight:800; color:var(--ink2); text-decoration:none">
+	<a href="/sessions/{session.id}/edit" style="display:block; text-align:center; padding:14px; background:var(--bg2); border-radius:14px; border:1.5px dashed var(--ink2); font-size:13px; font-weight:800; color:var(--ink2); text-decoration:none">
 		+ Add player results
 	</a>
 </div>

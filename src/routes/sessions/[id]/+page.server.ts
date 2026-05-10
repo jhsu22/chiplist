@@ -1,8 +1,14 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 
-import { getSession, getSessionEntries, getPlayers, getSessionSettlements, upsertEntry, removeEntry, deleteSession } from '$lib/db';
+import { getSession, getSessionEntries, getPlayers, getSessionSettlements, upsertEntry, removeEntry, deleteSession, getGroupById } from '$lib/db';
 import { parseMoney } from '$lib/utils';
+
+async function resolveLeaderStatus(db: import('@cloudflare/workers-types').D1Database, session: import('$lib/types').Session | null, userId: number): Promise<boolean> {
+	if (!session?.group_id) return true; // non-group sessions have no restriction
+	const group = await getGroupById(db, session.group_id);
+	return group?.owner_id === userId;
+}
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
 	if (!locals.user) redirect(302, '/login');
@@ -18,15 +24,23 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 
 	if (!session) error(404, 'Session not found');
 
-	return { session, entries, players, settlements };
+	const isLeader = await resolveLeaderStatus(db, session, locals.user.id);
+
+	return { session, entries, players, settlements, isLeader };
 };
 
 export const actions: Actions = {
-	upsert_entry: async ({ params, request, platform }) => {
+	upsert_entry: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
 		const db = platform!.env.DB;
 		const session_id = Number(params.id);
-		const data = await request.formData();
 
+		const session = await getSession(db, session_id);
+		if (!await resolveLeaderStatus(db, session, locals.user.id)) {
+			return fail(403, { error: 'Only the group leader can edit entries' });
+		}
+
+		const data = await request.formData();
 		const player_id = Number(data.get('player_id'));
 		const buy_in = parseMoney(String(data.get('buy_in') ?? '0'));
 		const cash_out = parseMoney(String(data.get('cash_out') ?? '0'));
@@ -38,18 +52,34 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	delete_session: async ({ params, platform }) => {
-		await deleteSession(platform!.env.DB, Number(params.id));
+	delete_session: async ({ params, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
+		const db = platform!.env.DB;
+		const session_id = Number(params.id);
+
+		const session = await getSession(db, session_id);
+		if (!await resolveLeaderStatus(db, session, locals.user.id)) {
+			return fail(403, { error: 'Only the group leader can delete this session' });
+		}
+
+		await deleteSession(db, session_id);
 		redirect(302, '/sessions');
 	},
 
-	remove_entry: async ({ params, request, platform }) => {
+	remove_entry: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
 		const db = platform!.env.DB;
 		const session_id = Number(params.id);
+
+		const session = await getSession(db, session_id);
+		if (!await resolveLeaderStatus(db, session, locals.user.id)) {
+			return fail(403, { error: 'Only the group leader can edit entries' });
+		}
+
 		const data = await request.formData();
 		const player_id = Number(data.get('player_id'));
-
 		if (!player_id) return fail(400, { error: 'Player required' });
+
 		await removeEntry(db, session_id, player_id);
 		return { success: true };
 	}

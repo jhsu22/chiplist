@@ -1,9 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { getSession, getSessionEntries, getPlayers, updateSession, upsertEntry } from '$lib/db';
+import { getSession, getSessionEntries, getPlayers, updateSession, upsertEntry, getGroupById } from '$lib/db';
 import { parseMoney } from '$lib/utils';
 
-export const load: PageServerLoad = async ({ params, platform }) => {
+export const load: PageServerLoad = async ({ params, platform, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const db = platform!.env.DB;
 	const id = Number(params.id);
 
@@ -15,13 +16,26 @@ export const load: PageServerLoad = async ({ params, platform }) => {
 
 	if (!session) error(404, 'Session not found');
 
+	if (session.group_id) {
+		const group = await getGroupById(db, session.group_id);
+		if (group?.owner_id !== locals.user.id) redirect(302, `/sessions/${id}`);
+	}
+
 	return { session, entries, players };
 };
 
 export const actions: Actions = {
-	default: async ({ params, request, platform }) => {
+	default: async ({ params, request, platform, locals }) => {
+		if (!locals.user) return fail(401, { error: 'Not logged in' });
 		const db = platform!.env.DB;
 		const id = Number(params.id);
+
+		const session = await getSession(db, id);
+		if (session?.group_id) {
+			const group = await getGroupById(db, session.group_id);
+			if (group?.owner_id !== locals.user.id) return fail(403, { error: 'Only the group leader can edit this session' });
+		}
+
 		const data = await request.formData();
 
 		const location = String(data.get('location') ?? '').trim();
