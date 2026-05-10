@@ -58,7 +58,7 @@ export const actions: Actions = {
 		let groupOwnerId: number | null = null;
 		if (group_id) {
 			const group = await getGroupById(db, group_id);
-			if (group && group.owner_id && group.owner_id !== locals.user.id) {
+			if (group && group.owner_id !== locals.user.id) {
 				status = 'pending';
 			}
 			groupOwnerId = group?.owner_id ?? null;
