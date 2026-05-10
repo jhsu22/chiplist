@@ -60,6 +60,17 @@
 		};
 	});
 
+	// ── iOS PWA viewport height fix ──────────────────────────────────────────
+	// 100dvh misreports the visual viewport in iOS standalone mode; use
+	// window.innerHeight which is always correct.
+	onMount(() => {
+		const setHeight = () =>
+			document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+		setHeight();
+		window.addEventListener('resize', setHeight);
+		return () => window.removeEventListener('resize', setHeight);
+	});
+
 	// ── Push notification subscription ──────────────────────────────────────
 	onMount(async () => {
 		if (!data.vapidPublicKey) return;
@@ -154,6 +165,7 @@
 <style>
 .shell {
 	height: 100dvh;
+	height: var(--app-height, 100dvh);
 	display: flex;
 	align-items: center;
 	justify-content: center;
